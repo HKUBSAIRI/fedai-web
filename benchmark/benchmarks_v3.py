@@ -21,9 +21,11 @@ def curve(day):
     row = Y[Y.index < day].iloc[-1]
     return np.array(list(MAT.values())), row[list(MAT)].values.astype(float)
 def fwd(tau, m, y):           # instantaneous forward from linear interpolation of y*tau
-    yt = m * y; e = 0.05
-    a, b = max(tau - e, m[0]), tau + e
-    return (np.interp(b, m, yt) - np.interp(a, m, yt)) / (b - a)
+    # the cumulative yield starts at (0, 0), so horizons shorter than the 3-month bill (December SEPs, current year) use the
+    # 3-month rate; before 2026-11-05 the curve started at 3 months and those forwards came out as 0 (then floored)
+    m0 = np.r_[0.0, m]; yt = np.r_[0.0, m * y]; e = 0.05
+    a, b = max(tau - e, 0.0), tau + e
+    return (np.interp(b, m0, yt) - np.interp(a, m0, yt)) / (b - a)
 mk = {}
 for t in meetings:
     m, y = curve(pd.Timestamp(t)); yr = pd.Timestamp(t).year

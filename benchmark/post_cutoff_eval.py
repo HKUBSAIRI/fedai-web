@@ -16,9 +16,10 @@ Y = Y.sort_values('date').set_index('date').ffill()
 def market(day, h):
     row = Y[Y.index < day].iloc[-1]; m = np.array(list(MAT.values())); y = row[list(MAT)].values.astype(float)
     if h == 'LR': return (10 * y[-1] - 5 * y[-2]) / 5
-    tau = max((pd.Timestamp(f'{day.year + int(h)}-12-31') - day).days / 365.25, .1); yt = m * y; e = .05
-    a, b = max(tau - e, m[0]), tau + e
-    return (np.interp(b, m, yt) - np.interp(a, m, yt)) / (b - a)
+    tau = max((pd.Timestamp(f'{day.year + int(h)}-12-31') - day).days / 365.25, .1); e = .05
+    m0 = np.r_[0.0, m]; yt = np.r_[0.0, m * y]           # curve starts at (0, 0): short horizons use the 3-month bill
+    a, b = max(tau - e, 0.0), tau + e
+    return (np.interp(b, m0, yt) - np.interp(a, m0, yt)) / (b - a)
 def dots(t, target): return np.sort(D[(D.meeting_date == t) & (D.target == target)].rate.values)
 def prev_dots(t, target):
     p = seps[seps.index(t) - 1]; tg = D[D.meeting_date == p].target.unique()

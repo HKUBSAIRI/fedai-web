@@ -7,13 +7,14 @@ Input CSV (one row per participant, SEP and horizon), columns:
   prediction     predicted year-end fed funds rate (midpoint, percent)
 Usage: python evaluate_external.py my_method.csv [--name MyMethod] [--split 2014-2020|2019-2020|all]
 Output: the method added to the benchmark table on the rows it covers, with paired t / Wilcoxon tests against B0 and B14."""
-import argparse, numpy as np, pandas as pd
+import argparse, os, numpy as np, pandas as pd
 from scipy import stats
 from splits import mask
 ap = argparse.ArgumentParser(); ap.add_argument('csv'); ap.add_argument('--name', default=None); ap.add_argument('--split', default='2014-2020', help='2014-2020 | 2019-2020 | person6040 | all')
 a = ap.parse_args()
 name = a.name or a.csv.rsplit('/', 1)[-1].rsplit('.', 1)[0]
-B = pd.read_csv('data/predictions_v6.csv', parse_dates=['meeting_date'])
+BASE = 'data/predictions_v8.csv' if os.path.exists('data/predictions_v8.csv') else 'data/predictions_v6.csv'   # all baselines
+B = pd.read_csv(BASE, parse_dates=['meeting_date'])
 B['year'] = B.meeting_date.dt.year
 X = pd.read_csv(a.csv); X['meeting_date'] = pd.to_datetime(X.meeting_date)
 if 'horizon' not in X and 'target_year' in X:

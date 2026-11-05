@@ -12,7 +12,7 @@ Three parts, each on exactly the rows the simulation covers:
   3. policy -> preferred action / target range (group rule for votes) or the member's own for/against vote, next to the
      baselines of policy_bench.py. Records that only give selected_alternative need --alternatives (meeting_date,
      alternative, action, target_after).
-Run in the benchmark work directory after `run_all.sh` (it needs data/predictions_v6.csv, data/policy_*.csv).
+Run in the benchmark work directory after `run_all.sh` (it needs data/predictions_v8.csv or _v6.csv, data/policy_*.csv).
 Usage: python score_simulation.py <files or globs ...> --name NAME [--judge] [--alternatives map.csv]"""
 import argparse, glob, hashlib, json, os, re, subprocess, sys, threading, concurrent.futures as cf
 import numpy as np, pandas as pd
@@ -27,7 +27,8 @@ ap.add_argument('--judge', action='store_true', help='judge narrative answers wi
 ap.add_argument('--alternatives', help='CSV meeting_date, alternative, action (hike/hold/cut), target_after (midpoint)')
 a = ap.parse_args()
 NAME = re.sub(r'[^A-Za-z0-9_.-]+', '_', a.name)
-for need in ['data/predictions_v6.csv', 'data/projections.csv', 'data/policy_meetings.csv', 'data/policy_votes.csv']:
+BASE = 'data/predictions_v8.csv' if os.path.exists('data/predictions_v8.csv') else 'data/predictions_v6.csv'
+for need in [BASE, 'data/projections.csv', 'data/policy_meetings.csv', 'data/policy_votes.csv']:
     if not os.path.exists(need): sys.exit(f'{need} not found: run this in the benchmark work directory after run_all.sh')
 
 # ---------- read the records -------------------------------------------------------------------------------------------
@@ -104,7 +105,7 @@ if len(D):
     print(f'\n=== 1. Dot plot, fed funds rate: {NAME} against the statistical baselines on the same rows')
     subprocess.run([sys.executable, os.path.join(HERE, 'evaluate_external.py'), f'data/sim_{NAME}_dots.csv', '--name', f'SIM_{NAME}', '--split', 'all'], check=True)
     # by calendar year: 2020 (zero lower bound, everyone at 0.125) is easy and can hide a weak year; committee level = median dot
-    Pb = pd.read_csv('data/predictions_v6.csv', parse_dates=['meeting_date']); Pb['h'] = Pb.h.astype(str)
+    Pb = pd.read_csv(BASE, parse_dates=['meeting_date']); Pb['h'] = Pb.h.astype(str)
     Mb = Pb.merge(ff.assign(meeting_date=pd.to_datetime(ff.meeting_date)).rename(columns={'participant': 'person_id', 'horizon': 'h', 'prediction': 'sim'})[['meeting_date', 'person_id', 'h', 'sim']],
                   on=['meeting_date', 'person_id', 'h'])
     REFS = {'B0_prior_own': 'B0 own last', 'B1b_no_change': 'B1b no change', 'B5_prior_plus_policy_change': 'B5', 'B14_combo_plus_text_h0': 'B14'}
