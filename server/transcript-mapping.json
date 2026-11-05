@@ -1,0 +1,11 @@
+{
+  "_comment": "Verified against docs/schema_introspection.md (2026-10-19, real DB). transcript_turns.version_id ↔ meetings.active_version_id; only active versions are shown.",
+  "table": "transcript_turns",
+  "idColumn": "turn_id",
+  "meetingKey": { "column": "version_id", "references": "version_id" },
+  "textColumn": "body_clean",
+  "personIdColumn": "person_id",
+  "speakerNameColumn": "speaker_raw",
+  "orderColumn": "sequence_number",
+  "sourceColumns": ["source_page", "document_id", "cleaner_version"]
+}

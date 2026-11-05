@@ -1,0 +1,14 @@
+node_modules/
+web/dist/
+.demo-pg/
+.scratch/
+.run/
+.env
+.env.*
+!.env.example
+*.log
+.env.agenda
+__pycache__/
+*.pyc
+deploy/.host
+benchmark/work/

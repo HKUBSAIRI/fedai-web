@@ -1,0 +1,23 @@
+# systemd unit: /etc/systemd/system/fedai-web.service
+[Unit]
+Description=FedAI data platform (read-only web app)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fedai
+WorkingDirectory=/opt/fedai-web
+# Database settings (read-only account) live in /opt/fedai-web/.env (chmod 600, owner fedai); the password in ~fedai/.pgpass.
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+RestartSec=5
+# hardening
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,10 @@
+# Versions used for the published results (Python 3.12). Statistical part: pandas numpy scikit-learn xgboost statsmodels scipy psycopg2.
+pandas==3.1.0
+numpy==2.5.4
+scikit-learn==1.9.1
+xgboost==3.4.1
+statsmodels==0.15.0
+scipy==1.18.1
+psycopg2-binary==2.9.13
+matplotlib==3.11.2
+tabulate==0.10.0
