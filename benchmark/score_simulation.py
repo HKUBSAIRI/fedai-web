@@ -12,7 +12,7 @@ Three parts, each on exactly the rows the simulation covers:
   3. policy -> preferred action / target range (group rule for votes) or the member's own for/against vote, next to the
      baselines of policy_bench.py. Records that only give selected_alternative need --alternatives (meeting_date,
      alternative, action, target_after).
-Run in the benchmark work directory after `run_all.sh` (it needs data/predictions_v8.csv or _v6.csv, data/policy_*.csv).
+Run in the benchmark work directory after `run_all.sh` (it needs data/predictions_v9.csv or an earlier version, data/policy_*.csv).
 Usage: python score_simulation.py <files or globs ...> --name NAME [--judge] [--alternatives map.csv]"""
 import argparse, glob, hashlib, json, os, re, subprocess, sys, threading, concurrent.futures as cf
 import numpy as np, pandas as pd
@@ -27,7 +27,7 @@ ap.add_argument('--judge', action='store_true', help='judge narrative answers wi
 ap.add_argument('--alternatives', help='CSV meeting_date, alternative, action (hike/hold/cut), target_after (midpoint)')
 a = ap.parse_args()
 NAME = re.sub(r'[^A-Za-z0-9_.-]+', '_', a.name)
-BASE = 'data/predictions_v8.csv' if os.path.exists('data/predictions_v8.csv') else 'data/predictions_v6.csv'
+BASE = next(f for f in ('data/predictions_v9.csv', 'data/predictions_v8.csv', 'data/predictions_v6.csv') if os.path.exists(f))
 for need in [BASE, 'data/projections.csv', 'data/policy_meetings.csv', 'data/policy_votes.csv']:
     if not os.path.exists(need): sys.exit(f'{need} not found: run this in the benchmark work directory after run_all.sh')
 

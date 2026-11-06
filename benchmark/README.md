@@ -4,7 +4,7 @@ Baselines for simulating FOMC participants, scored with the same metrics as the 
 
 | Task | What is predicted | Baselines | AI arms |
 |---|---|---|---|
-| Dot plot | each participant's year-end fed funds rate projection (SEP), by horizon | B0–B27: own previous dot, committee median, policy-change rules, Taylor rules, market forwards, regressions, time-series models (heterogeneous AR, VAR, panel VAR), news-based and machine-learning models, combinations | anonymous vs named, two-step (committee move + own previous dot), post-cutoff SEPs |
+| Dot plot | each participant's year-end fed funds rate projection (SEP), by horizon | B0–B28: own previous dot, committee median, policy-change rules, Taylor rules, market forwards, regressions, time-series models (heterogeneous AR, VAR, panel VAR), news-based and machine-learning models, combinations, expert forecasts of the median dot | anonymous vs named, two-step (committee move + own previous dot), post-cutoff SEPs |
 | SEP narratives | each participant's written answers | copy own previous answer, committee answer, peers (ex post) | material only / + own previous answer / + name and date |
 | Policy decisions and votes | hike / hold / cut, the target after the meeting, each voter's vote | no change, repeat last decision, inertial Taylor rule, market expectation (4-week bill); all vote for, own last vote, + market | anonymous / named / + market / + dissent direction / memory only |
 
@@ -20,7 +20,9 @@ comparisons are the anonymous arms and the meetings after the model's training c
   `PGSSLMODE`), or the file named by `FEDAI_ENV_FILE`; keep the password in `PGPASSWORD` or `~/.pgpass`.
   The scripts only read.
 - Internet access to FRED / ALFRED (no key needed). The Survey of Professional Forecasters is read from the frozen copy
-  `inputs/spf_median.csv` (`REFRESH_SPF=1` downloads it again from the Federal Reserve Bank of Philadelphia).
+  `inputs/spf_median.csv` (`REFRESH_SPF=1` downloads it again from the Federal Reserve Bank of Philadelphia). The New York
+  Fed dealer and market-participant surveys are read from `inputs/nyfed_expected_median.csv` (`REFRESH_NYFED=1` reads
+  the published PDFs again; needs `pdftotext`).
 - Panel VAR (B20, B21) only: R with the `panelvar` package; set `RSCRIPT=<path to Rscript>` if it is not on the path.
   Without R these two baselines are skipped.
 - AI experiments only: Azure OpenAI (`AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, or a file named by `FEDAI_AZURE_ENV`).
@@ -39,7 +41,7 @@ statistical part is.
 
 Estimation protocol: by default every SEP re-estimates parameters on all earlier SEPs (expanding window).
 `FEDAI_TRAIN_END=2015-12-31 bash run_all.sh` freezes parameters at that date (the group's unified protocol: estimate on
-2012–2015, test 2016–2020); then `python evaluate_unified.py data/predictions_v8.csv` in that work directory gives the
+2012–2015, test 2016–2020); then `python evaluate_unified.py data/predictions_v9.csv` in that work directory gives the
 unified-protocol table.
 
 ## Scoring your own method
@@ -48,7 +50,7 @@ Run in the work directory after `run_all.sh`:
 
 ```bash
 python <this folder>/evaluate_external.py my_dots.csv --name MyMethod --split 2014-2020
-python <this folder>/evaluate_unified.py data/predictions_v8.csv --add my_dots.csv MyMethod
+python <this folder>/evaluate_unified.py data/predictions_v9.csv --add my_dots.csv MyMethod
 python <this folder>/score_simulation.py <simulation output files> --name MySim [--judge]
 ```
 
@@ -62,7 +64,7 @@ python <this folder>/score_simulation.py <simulation output files> --name MySim 
 | Step | Scripts | What they do |
 |---|---|---|
 | data | `export_data.py`, `build_dataset.py`, `inputs/` | export from the database and FRED; one row per participant × SEP × horizon |
-| dot plot | `benchmarks*.py`, `news.py`, `pvar.R`, `fetch_spf.py`, `text_features.py`, `features_external.py`, `evaluate.py`, `evaluate_external.py`, `evaluate_unified.py`, `by_member.py`, `persona_decomp.py`, `protocol.py`, `splits.py` | baselines B0–B27 (`benchmarks_v7.py`: time series; `benchmarks_v8.py`: news, machine learning, combinations), metrics, test splits (2014–2020, 2019–2020, per-person 60/40; unified 2016–2020 / 2016–2019) |
+| dot plot | `benchmarks*.py`, `news.py`, `pvar.R`, `fetch_spf.py`, `fetch_nyfed_survey.py`, `text_features.py`, `features_external.py`, `evaluate.py`, `evaluate_external.py`, `evaluate_unified.py`, `by_member.py`, `persona_decomp.py`, `protocol.py`, `splits.py` | baselines B0–B28 (`benchmarks_v7.py`: time series; `benchmarks_v8.py`: news, machine learning, combinations; `benchmarks_v9.py`: expert forecasts), metrics, test splits (2014–2020, 2019–2020, per-person 60/40; unified 2016–2020 / 2016–2019) |
 | dot plot, AI | `lookahead_probe.py`, `llm_benchmark.py`, `twostep.py`, `fetch_post_cutoff.py`, `post_cutoff_eval.py`, `fetch_materials.py`, `post_cutoff_llm.py`, `chrono/` | memory probe, anonymous vs named, two-step, post-cutoff SEPs, ChronoGPT pilot |
 | narratives | `narr_export.py`, `narr_context.py`, `narr_bench.py`, `narr_prompts.py`, `narr_report.py`, `narr_length.py` | generation, judging with the group's SUBSTANTIVE_ALIGNMENT prompt, judge checks, length adjustment |
 | policy | `policy_data.py`, `policy_bench.py`, `policy_llm.py`, `inputs/dissent_direction.csv` | ground truth from FRED's daily target, baselines, AI arms, dissent directions |

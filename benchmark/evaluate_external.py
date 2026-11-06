@@ -13,7 +13,7 @@ from splits import mask
 ap = argparse.ArgumentParser(); ap.add_argument('csv'); ap.add_argument('--name', default=None); ap.add_argument('--split', default='2014-2020', help='2014-2020 | 2019-2020 | person6040 | all')
 a = ap.parse_args()
 name = a.name or a.csv.rsplit('/', 1)[-1].rsplit('.', 1)[0]
-BASE = 'data/predictions_v8.csv' if os.path.exists('data/predictions_v8.csv') else 'data/predictions_v6.csv'   # all baselines
+BASE = next(f for f in ('data/predictions_v9.csv', 'data/predictions_v8.csv', 'data/predictions_v6.csv') if os.path.exists(f))   # all baselines
 B = pd.read_csv(BASE, parse_dates=['meeting_date'])
 B['year'] = B.meeting_date.dt.year
 X = pd.read_csv(a.csv); X['meeting_date'] = pd.to_datetime(X.meeting_date)
