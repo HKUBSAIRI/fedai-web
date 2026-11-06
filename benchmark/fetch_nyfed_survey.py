@@ -41,5 +41,5 @@ for (year, month), pair in sorted(FILES.items()):
             rows.append(dict(survey=survey, sep_year=year, sep_month=month, target=target, expected_median=value, source=BASE + path))
 os.makedirs('data', exist_ok=True)
 with open('data/nyfed_expected_median.csv', 'w', newline='') as fh:
-    w = csv.DictWriter(fh, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
+    w = csv.DictWriter(fh, fieldnames=list(rows[0]), lineterminator='\n'); w.writeheader(); w.writerows(rows)
 print(len(rows), 'rows from', len(FILES), 'SEPs')
