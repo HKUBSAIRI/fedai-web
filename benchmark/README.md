@@ -52,12 +52,16 @@ Run in the work directory after `run_all.sh`:
 python <this folder>/evaluate_external.py my_dots.csv --name MyMethod --split 2014-2020
 python <this folder>/evaluate_unified.py data/predictions_v9.csv --add my_dots.csv MyMethod
 python <this folder>/score_simulation.py <simulation output files> --name MySim [--judge]
+python <this folder>/evaluate_persona.py my_signal.csv MySignal
 ```
 
 - `evaluate_external.py` / `evaluate_unified.py`: a CSV with `meeting_date`, `participant` (person_id or name),
   `horizon` (0–3 or LR), `prediction`; the method is scored on the rows it covers next to every baseline, with paired tests.
 - `score_simulation.py`: the multi-agent output files as they are (dots, narrative answers, policy and votes), each part
   scored against the baselines on the same rows.
+- `evaluate_persona.py`: a persona signal for the individual deviation from (own previous dot + committee move): a CSV with
+  `meeting_date`, `participant`, `horizon` and probabilities `p_down`, `p_same`, `p_up` and/or a `deviation` in percentage
+  points; scored against P1 (distance to the previous median) and the two-step ceiling, including six turning-point SEPs.
 
 ## Scripts
 
@@ -65,6 +69,7 @@ python <this folder>/score_simulation.py <simulation output files> --name MySim 
 |---|---|---|
 | data | `export_data.py`, `build_dataset.py`, `inputs/` | export from the database and FRED; one row per participant × SEP × horizon |
 | dot plot | `benchmarks*.py`, `news.py`, `pvar.R`, `fetch_spf.py`, `fetch_nyfed_survey.py`, `text_features.py`, `features_external.py`, `evaluate.py`, `evaluate_external.py`, `evaluate_unified.py`, `by_member.py`, `persona_decomp.py`, `protocol.py`, `splits.py` | baselines B0–B28 (`benchmarks_v7.py`: time series; `benchmarks_v8.py`: news, machine learning, combinations; `benchmarks_v9.py`: expert forecasts), metrics, test splits (2014–2020, 2019–2020, per-person 60/40; unified 2016–2020 / 2016–2019) |
+| persona | `persona_deviation.py`, `persona_information.py`, `persona_robustness.py`, `evaluate_persona.py` | split each revision into the committee's move and the individual deviation; data cards (M0–M8), probability and mean scores, expanding window, dissents, heterogeneity, wild bootstrap; evaluator for new signals |
 | dot plot, AI | `lookahead_probe.py`, `llm_benchmark.py`, `twostep.py`, `fetch_post_cutoff.py`, `post_cutoff_eval.py`, `fetch_materials.py`, `post_cutoff_llm.py`, `chrono/` | memory probe, anonymous vs named, two-step, post-cutoff SEPs, ChronoGPT pilot |
 | narratives | `narr_export.py`, `narr_context.py`, `narr_bench.py`, `narr_prompts.py`, `narr_report.py`, `narr_length.py` | generation, judging with the group's SUBSTANTIVE_ALIGNMENT prompt, judge checks, length adjustment |
 | policy | `policy_data.py`, `policy_bench.py`, `policy_llm.py`, `inputs/dissent_direction.csv` | ground truth from FRED's daily target, baselines, AI arms, dissent directions |

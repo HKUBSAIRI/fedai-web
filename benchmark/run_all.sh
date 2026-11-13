@@ -39,6 +39,10 @@ run by_member.py; run persona_decomp.py
 run evaluate_external.py data/selftest_B5.csv --name SELFTEST --split 2014-2020
 # 1b. policy decisions and votes: ground truth from FRED, simple baselines, the group's metrics
 run policy_data.py; run policy_bench.py
+# persona: how much of the individual deviation from the committee's move is predictable (parameters from 2012-2015; needs policy_votes.csv)
+run persona_deviation.py data/predictions_v9.csv; run persona_information.py; run persona_robustness.py
+# persona evaluator self-check: P1's own probabilities must reproduce the P1 row
+run evaluate_persona.py --selftest; run evaluate_persona.py data/selftest_persona_P1.csv SELFTEST
 
 if [[ $WITH_LLM == 1 ]]; then
   # 2. AI experiments on 2012-2020 SEPs (gpt-4.1-mini unless noted)
