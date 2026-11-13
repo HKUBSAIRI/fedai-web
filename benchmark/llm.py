@@ -7,11 +7,13 @@ ENV.update({k: v for k, v in os.environ.items() if k.startswith(('AZURE_OPENAI_'
 EP = ENV['AZURE_OPENAI_ENDPOINT'].rstrip('/'); KEY = ENV['AZURE_OPENAI_API_KEY']
 MODEL = os.environ.get('LLM_MODEL', ENV.get('FEDAI_RAG_CHAT_MODEL', 'gpt-4.1-mini')); VER = ENV.get('AZURE_OPENAI_API_VERSION', '2024-10-21')
 USAGE = {'in': 0, 'out': 0}
-REASONING = ('o4-mini', 'o3', 'gpt-5-mini', 'gpt-5', 'gpt-5.6-luna')
+REASONING = ('o4-mini', 'o3', 'gpt-5-mini', 'gpt-5', 'gpt-5.6-luna', 'gpt-6')
 def chat(system, user, temperature=0.0, max_tokens=600, model=None):
     model = model or MODEL
     msg = {'messages': [{'role': 'system', 'content': system}, {'role': 'user', 'content': user}], 'response_format': {'type': 'json_object'}}
-    if model.startswith(REASONING): msg['max_completion_tokens'] = max(8000, max_tokens * 6)      # reasoning models: no temperature
+    if model.startswith(REASONING):                                                              # reasoning models: no temperature
+        msg['max_completion_tokens'] = max(8000, max_tokens * 6)
+        if os.environ.get('LLM_REASONING_EFFORT'): msg['reasoning_effort'] = os.environ['LLM_REASONING_EFFORT']   # low, medium, high
     else: msg.update(temperature=temperature, max_tokens=max_tokens)
     body = json.dumps(msg).encode()
     url = f'{EP}/openai/deployments/{model}/chat/completions?api-version=2025-01-01-preview'
